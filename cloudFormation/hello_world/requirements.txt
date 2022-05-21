@@ -1,0 +1,4 @@
+requests
+types-requests
+aws-lambda-typing
+pydantic
