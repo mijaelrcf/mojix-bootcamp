@@ -1,44 +1,24 @@
-import json
+import boto3
 
-# import requests
+def upload_to_aws(local_file, s3_file):
+    s3 = boto3.client('s3')
 
+    try:
+        s3.upload_file(local_file, os.environ['BUCKET_NAME'], s3_file)
+        url = s3.generate_presigned_url(
+            ClientMethod='get_object',
+            Params={
+                'Bucket': os.environ['BUCKET_NAME'],
+                'Key': s3_file
+            },
+            ExpiresIn=24 * 3600
+        )
 
-def lambda_handler(event, context):
-    """Sample pure Lambda function
-
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps(
-            {
-                "message": "hello world",
-                # "location": ip.text.replace("\n", "")
-            }
-        ),
-    }
+        print("Upload Successful", url)
+        return url
+    except FileNotFoundError:
+        print("The file was not found")
+        return None
+    except NoCredentialsError:
+        print("Credentials not available")
+        return None
