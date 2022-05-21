@@ -26,3 +26,5 @@ def upload_to_aws(local_file, s3_file):
     except NoCredentialsError:
         print("Credentials not available")
         return None
+
+        
